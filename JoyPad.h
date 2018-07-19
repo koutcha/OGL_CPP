@@ -49,12 +49,13 @@ public:
 	uint16_t getZAxsis(int id)const;
 	uint16_t getRAxsis(int id)const;
 
+	bool checkConnection(int id)const;
+	int getJoypadNum()const;
 private:
 	
 	//JoyPad* instance;
 	std::unique_ptr<int[]> supoertedId;
 	int joyPadNum;
-	std::unique_ptr<JOYINFOEX> joyInfo;
 
 	bool checkIDisValid(int id)const;
 };

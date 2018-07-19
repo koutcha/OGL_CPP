@@ -134,10 +134,10 @@ void Font::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale,GLfl
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(program);
-	Matrix projection = Matrix::orthogonal(0.0f,width, 0.0f, height,-1,1);
+	Matrix projection = Matrix::orthogonal(0.0f,width, 0.0f, height,-10,10);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE,projection.data());
 
-	glUniform3f(glGetUniformLocation(program, "textColor"), color[0], color[1], color[3]);
+	glUniform3f(glGetUniformLocation(program, "textColor"), color[0], color[1], color[2]);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vao);
 	// Iterate through all characters
@@ -175,7 +175,8 @@ void Font::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale,GLfl
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
+	glDisable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 void Font::bindFontTexture(unsigned int unitNumber)
 {

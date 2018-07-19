@@ -5,11 +5,12 @@
 #include "Vector2.h"
 #include <array>
 #include "Unocopyable.h"
+
 namespace PongGame
 {
 	class Controller:public UnCopyable
 	{
-
+	
 	public:
 		enum Operate
 		{
@@ -22,25 +23,27 @@ namespace PongGame
 			ACTION0 = 6,
 			ACTION1 = 7
 		};
+		static const unsigned int buttonNumber = 8;
 		Controller(const std::shared_ptr<const Window> window,const std::shared_ptr<const JoyPad> joypad,int joypadID);
 		~Controller();
 		void updateFrame();
+		void setID(int id);
+
+		void assignButtons(const std::array<JoyPad::Buttons, buttonNumber>& buttonList);
+
+		void assignKeys(const std::array<unsigned int, buttonNumber>& openGLKeyID);
 
 		void assignButton(Operate operate, JoyPad::Buttons button);
 		void assignKey(Operate operate, unsigned int openGLKeyID);
 
-		void disableKeyBoard();
-		void enableKeyBoard();
-
-		bool getOperateIsOn(Operate operate);
-		unsigned int getOperateingFrames(Operate operate);
+		bool getOperateIsOn(Operate operate)const;
+		unsigned int getOperateingFrames(Operate operate)const;
 		//retrun leftStickAxis
 		const Vector2f getLeftAxis()const;
 		//return rightStickAxis
 		const Vector2f getRightAxis()const;
+		 bool checkConnection() const;
 	private:
-		static const unsigned int buttonNumber = 8;
-		bool isKeyBoardInvalid;
 		int joypadID;
 
 		std::array<unsigned int, buttonNumber> assignKeyID;
@@ -48,8 +51,8 @@ namespace PongGame
 
 		std::array<unsigned int, buttonNumber> pushingFrame;
 
-		std::weak_ptr<const Window> window;
-		std::weak_ptr<const JoyPad> joypad;
+		std::shared_ptr<const Window> window;
+		std::shared_ptr<const JoyPad> joypad;
 
 		Vector2f leftStickPos;
 		Vector2f rightStickPos;

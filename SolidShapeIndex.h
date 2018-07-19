@@ -12,8 +12,10 @@ public:
 	 void  execute() const override;
 	 static std::shared_ptr<Shape>  createSphereShape(int slices,int stacks,float radius);
 	 static std::shared_ptr<Shape> createBoxShape();
+	 static std::shared_ptr<Shape> createBoxShape(float uvScaleX,float uvScaleY,float uvScaleZ);
 	 static std::shared_ptr<Shape>	createPlaneShape(float width,float depth);
 	 static std::shared_ptr<Shape> createTriangleShape();
+	 
 
 };
 

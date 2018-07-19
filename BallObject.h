@@ -7,7 +7,7 @@ class ColliderSphere;
 class BallObject:public RagidObject
 {
 public:
-	BallObject(shared_ptr<Shape> shape,float r);
+	BallObject(const shared_ptr<const Shape>& shape,float r);
 	~BallObject();
 	float getRadius()const;
 	void setPosition(const Vector3f&) override;

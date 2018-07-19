@@ -40,7 +40,7 @@ bool ColliderCube::intersect(const ColliderObject &obj) const
 				&& position.y + halfSize.y >= obj.getPosition().y - obj.getHalfSize().y)
 			{
 				if (obj.getPosition().z + obj.getHalfSize().z >= position.z - halfSize.z
-					&& position.z + halfSize.x >= obj.getPosition().z - obj.getHalfSize().z)
+					&& position.z + halfSize.z >= obj.getPosition().z - obj.getHalfSize().z)
 				{
 					result = true;
 				}

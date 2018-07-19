@@ -84,23 +84,22 @@ out vec4 fragment;
 void main()
 {
 
+
+
 	vec3 normal =normalMapOn? texture(normalMap,UV).rgb : vec3(0,0,1);
 	//normal mapÇ©ÇÁñ@ê¸éÊìæ îÕàÕ[0,1]
-	//normal = normalize(normal);
-	
-	//normal = vec3(0,0,1);
-	//normal = N;
 	//[-1,1]Ç…ïœä∑
 	if(normalMapOn)
 	normal = normalize(normal*2.0 -1.0) ;
 
-	vec3 Iamb = Kamb*Lamb;
 
 	vec3  L = normalize(TLpos - Tpos);
 	float diff = max(dot(L,normal),0.0);
-	vec4 tempDiff = skinTexOn ?texture(skin,UV):vec4(Kdiff,1.0);
+	vec4 tempDiff = skinTexOn ?texture(skin,UV)*vec4(Kdiff,1.0):vec4(Kdiff,1.0);
 	vec3 Idiff = vec3(tempDiff)*Ldiff ;
 	Idiff *= diff;
+
+	vec3 Iamb = Kamb*Lamb;
 
 	vec3 V = normalize(TVpos - Tpos);
 	vec3 H = normalize(L+V);
@@ -111,5 +110,5 @@ void main()
 	float shadow = ShadowCalculation(LSP);
 	vec3 temp = (Idiff+Ispec)*(1.0-shadow*0.7)+ Iamb;
 	//vec3 temp = vec3(1,0,1);
-	fragment = vec4(temp,tempDiff.w);
+	fragment = vec4(temp,0.5);
 }

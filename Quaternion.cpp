@@ -35,10 +35,10 @@ void Quaternion::setRotation(const Vector3f & axis, float angle)
 	v = axis;
 	v.normalize();
 
-	v.x *= sin(M_PI*angle/360.0f);
-	v.y *= sin(M_PI*angle /360.0f);
-	v.z *= sin(M_PI*angle / 360.0f);
-	w = cos(M_PI*angle / 360.0f);
+	v.x *= sin(angle/2.0f);
+	v.y *= sin(angle/2.0f);
+	v.z *= sin(angle/2.0f);
+	w = cos(angle/2.0f);
 	//v.debugWrite("q");
 }
 

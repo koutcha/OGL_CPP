@@ -18,9 +18,9 @@
 #include "ShadowFBO.h"
 #include "JoyPad.h"
 #include "StaticCube.h"
-
+#include "DynamicCube.h"
 ballSim::ballSim(const Window& window,const JoyPad& joypad):
-	ballArray(5000),
+	ballArray(2),
 	window(window),
 	pad(joypad)
 {
@@ -41,8 +41,10 @@ ballSim::ballSim(const Window& window,const JoyPad& joypad):
 	sounds.insert(std::make_pair("stone", std::make_shared<Sound::SoundPlayer>("stone.wav")));
 
 	cube = std::make_shared<StaticCube>(SolidShapeIndex::createBoxShape(),Vector3f(6,6,6));
+	dCube = std::make_shared<DynamicCube>(SolidShapeIndex::createBoxShape(), Vector3f(6, 6, 6));
 
 	cube->setPosition(Vector3f(0, 0, 0));
+	dCube->setPosition(Vector3f(0, 0, 0));
 
 	font = std::make_unique<Font>("test.ttf");
 	font->init();
@@ -54,13 +56,14 @@ ballSim::ballSim(const Window& window,const JoyPad& joypad):
 
 	const std::shared_ptr<Shape> shape = shapes.at("sphere");
 
-	radius = 1.0;
+	radius = 2.0;
 	float x = -17;
 	float z = -17;
 	ballArray[0] = make_shared<BallInGame>(shape, radius, BallInGame::SPECIAL);
-	ballArray[0]->setPosition(Vector3f(6, 15, 0));
+	ballArray[0]->setPosition(Vector3f(3, 15, 0));
 
-	ballArray[0]->setWeight(10.0);
+	ballArray[0]->setWeight(5.0);
+	//ballArray[0]->addRotation(0.75, Vector3f(0, 0, -1));
 	x += 5;
 
 	for (int i = 1; i < ballArray.size(); ++i) {
@@ -163,17 +166,15 @@ void ballSim::update()
 	const float g = 100.f;
 	camcount += 0.000;
 	mainCam->setPosition(Vector3f(20 * sin(camcount), 20, 20 * cos(camcount)));
-	for (auto x : ballArray) {
+	for (auto& x : ballArray) {
 		//x->setPosition(Vector3f(0, 7.0, 0));
 		x->addGravity(Vector3f(0, -g, 0));
 		x->update(0.016);
 		const ColliderSphere& c0 = x->getCollider();
-		const ColliderCube& c1 = cube->getCollider();
+		const ColliderCube& c1 = dCube->getCollider();
 		if (c0.intersect(c1))
 		{
-
-			correctSpherepos(x, *cube);
-			collisionResponseForBallAndCube(x, *cube, 1.0);
+			collisionResponseForBallAndCube(x, dCube, 1.0);
 		}
 		MyMath::checkWall(wallHalfWidth, wallHalfDepth, radius, 30.0, *x);
 	}
@@ -245,9 +246,9 @@ void ballSim::update()
 	default:
 		break;
 	}
-	//tree->reset();
-	//tree->createColliderList(ballArray);
-	//tree->constructTree();
+	tree->reset();
+	tree->createColliderList(ballArray);
+	tree->constructTree();
 
 
 
@@ -267,7 +268,7 @@ void ballSim::update()
 			x->draw(shadowMapObject->getModelLocation());
 		}
 	}
-	cube->draw(shadowMapObject->getModelLocation());
+	dCube->draw(shadowMapObject->getModelLocation());
 	glUniformMatrix4fv(shadowMapObject->getModelLocation(), 1, GL_FALSE, Matrix::Identity().data());
 	shapes.at("plane")->draw();
 
@@ -331,7 +332,7 @@ void ballSim::update()
 
 			x->draw(shaderModelLoc);
 	}
-	cube->draw(shaderModelLoc);
+	dCube->draw(shaderModelLoc);
 	if (program == ctShader)
 	{
 		ctMaterial->select(2);
@@ -413,26 +414,28 @@ void ballSim::update()
 
 	if (window.keyOn(GLFW_KEY_A))
 	{
-		program = celShader;
+		//program = celShader;
 		//shaderName = "celShader";
+		dCube->setPosition(Vector3f(5,0,0));
 	}
 	else if (window.keyOn(GLFW_KEY_S))
 	{
-		program = generalShader;
+		//program = generalShader;
 		//shaderName = "standardShader(phong)";
+		dCube->setPosition(Vector3f(0, 0, 0));
 	}
 	else if (window.keyOn(GLFW_KEY_D))
 	{
-		program = ctShader;
+		//program = ctShader;
 		//shaderName = "standardShader(cook trrance)";
-
+		dCube->setPosition(Vector3f(-5, 0, 0));
 	}
 	//shaderName += to_string((double)intersectCount / (double)counter);
 
 
 	if (window.keyOn(GLFW_KEY_ENTER))
 	{
-		ballArray[0]->setPosition(Vector3f(-6.0002, 15, 6.0000));
+		ballArray[0]->setPosition(Vector3f(-6.4, 15, 6.0000));
 		ballArray[0]->setVelocity(Vector3f(0, 0, 0));
 		if (!pressedEnter) {
 			//alSourcePlay(sourceID);

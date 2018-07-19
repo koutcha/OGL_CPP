@@ -9,6 +9,7 @@ public:
 	Camera(const Vector3f&position, const Vector3f& up, const Vector3f& gaze, float near, float far);
 	virtual ~Camera();
 	virtual void setCamera(GLuint viewLoc, GLuint projectionLoc) const = 0;
+	virtual void setViewPos(GLuint viewPosLoc)const;
 	void setPosition(const Vector3f&);
 	void setUp(const Vector3f&);
 	void setGaze(const Vector3f&);

@@ -34,6 +34,18 @@ namespace Sound
 		alSourcePlay(sourceID);
 	}
 
+	void SoundPlayer::play3D(const Vector3f & p) const
+	{
+		alSourcefv(sourceID, AL_POSITION, p.getArrayData().data());
+		play();
+	}
+
+	void SoundPlayer::setPosition(const Vector3f& p)
+	{
+		alSourcefv(sourceID, AL_POSITION, p.getArrayData().data());
+	}
+	
+
 	void SoundPlayer::loadWav(const char * filename)
 	{
 		InWave wav(filename);

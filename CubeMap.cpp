@@ -21,7 +21,7 @@ CubeMap::CubeMap(std::array<std::string, 6> faces)
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			std::cout << "Cubemap texture succeed to load at path: " << faces[i] << std::endl;
+			//std::cout << "Cubemap texture succeed to load at path: " << faces[i] << std::endl;
 			stbi_image_free(data);
 		}
 		else

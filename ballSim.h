@@ -23,6 +23,7 @@ class Font;
 class Window;
 class  JoyPad;
 class StaticCube;
+class DynamicCube;
 class ballSim
 {
 public:
@@ -48,7 +49,8 @@ private:
 	unique_ptr<Uniform<CTMaterial>> ctMaterial;
 
 	std::shared_ptr<StaticCube> cube;
-
+	std::shared_ptr<DynamicCube> dCube;
+	
 	std::vector<std::shared_ptr<BallInGame>> ballArray;
 	std::unique_ptr<OctTree> tree;
 	std::unique_ptr<ShadowFBO> shadowMapObject;

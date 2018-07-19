@@ -3,7 +3,10 @@
 #include "Matrix.h"
 #include "Shape.h"
 StaticObject::StaticObject(std::shared_ptr<Shape> shape):
-	shape(shape)
+	shape(shape),
+	position(0,0,0),
+	rotation(0,0,0),
+	shapeScale(1,1,1)
 {
 }
 

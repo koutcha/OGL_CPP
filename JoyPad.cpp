@@ -9,8 +9,7 @@
 
 using namespace std;
 
-JoyPad::JoyPad() :
-	joyInfo(make_unique<JOYINFOEX>()),
+JoyPad::JoyPad():
 	supoertedId(0)
 {
 	
@@ -24,25 +23,26 @@ bool JoyPad::checkIDisValid(int id) const
 	
 	if (!(joyPadNum >0) ||id > joyPadNum || id < 0)
 	{
-		cerr << "joypad id[" << id <<"] is invalid";
+		
 		return false;
 	}
 	else
 	{
-		true;
+		return true;
 	}
 
 }
 
 bool JoyPad::intialize()
 {
-	joyInfo->dwSize = sizeof(JOYINFOEX);
-	joyInfo->dwFlags = JOY_RETURNALL;
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	int padNum = 0;
 	list<int> idList;
 	for (unsigned int i = 0; i<joyGetNumDevs(); i++) {//サポートされているジョイスティックの数を返す
-		if (JOYERR_NOERROR == joyGetPosEx(i, joyInfo.get())) {
-			printf("ジョイスティック No.%d　接続されています\n", i);
+		if (JOYERR_NOERROR == joyGetPosEx(i, &joyInfo)) {
+			//printf("ジョイスティック No.%d　接続されています\n", i);
 			padNum++;
 			idList.push_back(i);
 		}
@@ -50,15 +50,17 @@ bool JoyPad::intialize()
 	//パッドがつながってなかったら返す
 	if (padNum < 1) {
 		joyPadNum = 0;
-		cerr << "no pad is connecting" << endl;
+		//cerr << "no pad is connecting" << endl;
 		return false;
 	}
+	
 	joyPadNum = padNum;
-	supoertedId = make_unique<int[]>(padNum);
+	cout << "padNum" << joyPadNum << endl;
+	supoertedId = make_unique<int[]>(joyPadNum);
 	auto itr = idList.begin();
 	for (int i = 0; i < padNum; ++i) {
 		supoertedId[i] = *itr;
-		printf("id:%dにNo.%dを登録\n", i, *itr);
+		//printf("id:%dにNo.%dを登録\n", i, *itr);
 		itr++;
 	}
 	return true;
@@ -66,15 +68,17 @@ bool JoyPad::intialize()
 
 bool JoyPad::isOn(Buttons button, int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	if (!checkIDisValid(id)) {
 		return false;
 	}
 	unsigned flag = (unsigned)button;
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
-		//cout << "check" << endl;
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
 		if (button < 0x201)
 		{
-			flag = joyInfo->dwButtons & flag;
+			flag = joyInfo.dwButtons & flag;
 			if (flag > 0) {
 				return true;
 			}
@@ -83,9 +87,7 @@ bool JoyPad::isOn(Buttons button, int id)const
 			}
 		}
 		else {
-			//cout << "pov" << endl;
-			POVDirection pov = (POVDirection)joyInfo->dwPOV;
-			//cout << pov << endl;
+			POVDirection pov = (POVDirection)joyInfo.dwPOV;
 			switch (button)
 			{
 			//cout << "pov" << pov <<endl;
@@ -103,7 +105,7 @@ bool JoyPad::isOn(Buttons button, int id)const
 
 	}
 	else {
-		cout << " id " << id << " disconnected" << endl;
+		//cout << " id " << id << " disconnected" << endl;
 		return false;
 	}
 
@@ -113,14 +115,18 @@ bool JoyPad::isOn(Buttons button, int id)const
 
 JoyPad::POVDirection JoyPad::getPOVDirection(int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
+
 	if (!checkIDisValid(id)) {
 		return POV_NONE;
 	}
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
-		return (POVDirection)joyInfo->dwPOV;
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
+		return (POVDirection)joyInfo.dwPOV;
 	}
 	else {
-		cout <<" id " <<id << " disconnected" << endl;
+		//cout <<" id " <<id << " disconnected" << endl;
 		return POV_NONE;
 	}
 
@@ -128,58 +134,93 @@ JoyPad::POVDirection JoyPad::getPOVDirection(int id)const
 
 uint16_t JoyPad::getXAxsis(int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	if (!checkIDisValid(id)) {
 		return 32767;
 	}
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
 		//cout <<"x"<< joyInfo->dwXpos << endl;
-		return joyInfo->dwXpos;
+		return joyInfo.dwXpos;
 
 	}
 	else {
-		cout << " id " << id << " disconnected" << endl;
+		//cout << " id " << id << " disconnected" << endl;
 		return 32767;
 	}
 }
 
 uint16_t JoyPad::getYAxsis(int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	if (!checkIDisValid(id)) {
 		return 32767;
 	}
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
 		//cout << "y"<<joyInfo->dwYpos << endl;
-		return joyInfo->dwYpos;
+		return joyInfo.dwYpos;
 	}
 	else {
-		cout << " id " << id << " disconnected" << endl;
+		//cout << " id " << id << " disconnected" << endl;
 		return 32767;
 	}
 }
 uint16_t JoyPad::getZAxsis(int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	if (!checkIDisValid(id)) {
 		return 32767;
 	}
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
-		return joyInfo->dwZpos;
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
+		return joyInfo.dwZpos;
 	}
 	else {
-		cout << " id " << id << " disconnected" << endl;
+		//cout << " id " << id << " disconnected" << endl;
 		return 32767;
 	}
 }
 
 uint16_t JoyPad::getRAxsis(int id)const
 {
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
 	if (!checkIDisValid(id)) {
 		return 32767;
 	}
-	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], joyInfo.get())) {
-		return joyInfo->dwRpos;
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
+		return joyInfo.dwRpos;
 	}
 	else {
-		cout << " id " << id << " disconnected" << endl;
+		//cout << " id " << id << " disconnected" << endl;
 		return 32767;
 	}
+}
+
+bool JoyPad::checkConnection(int id)const
+{
+	JOYINFOEX joyInfo;
+	joyInfo.dwSize = sizeof(JOYINFOEX);
+	joyInfo.dwFlags = JOY_RETURNALL;
+	if (!checkIDisValid(id)) {
+		return false;
+	}
+
+	if (JOYERR_NOERROR == joyGetPosEx(supoertedId[id], &joyInfo)) {
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+int JoyPad::getJoypadNum() const
+{
+	return joyPadNum;
 }

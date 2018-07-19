@@ -3,6 +3,7 @@
 #include<array>
 #include <iostream>
 #include "Vector2.h"
+//距離の二乗を返す
 float MyMath::SquaringlengthAABBToPoint(const Vector3f & boxCenter, const Vector3f & boxSize, const Vector3f & point)
 {
 	Vector3f max(boxCenter.x+boxSize.x,boxCenter.y + boxSize.y, boxCenter.z + boxSize.z);
@@ -19,7 +20,28 @@ float MyMath::SquaringlengthAABBToPoint(const Vector3f & boxCenter, const Vector
 	}
 	return length;
 }
+Vector3f MyMath::Vector3AABBToPoint(const Vector3f & boxCenter, const Vector3f & boxSize, const Vector3f & point)
+{
+	Vector3f v(0, 0, 0);
+	Vector3f max(boxCenter.x + boxSize.x, boxCenter.y + boxSize.y, boxCenter.z + boxSize.z);
+	Vector3f min(boxCenter.x - boxSize.x, boxCenter.y - boxSize.y, boxCenter.z - boxSize.z);
+	float distance = 0;
+	for (int i = 0; i < 3; ++i)
+	{
+		distance = 0;
+		if (point.getByIndex(i) < min.getByIndex(i))
+			distance = point.getByIndex(i) - min.getByIndex(i);
 
+		if (point.getByIndex(i) > max.getByIndex(i))
+			distance = point.getByIndex(i) - max.getByIndex(i);
+
+		v.setByIndex(i, distance);
+
+	}
+	
+	return v;
+
+}
 void MyMath::checkWall(float wallHalfWidth, float wallHalfDepth, RagidObject& ragid)
 {
 
@@ -121,13 +143,13 @@ Vector3f MyMath::calcReflex(const Vector3f& v1, const Vector3f& action, float m,
 Vector3f MyMath::calcImpulse(const Vector3f & v1, const Vector3f v2, const Vector3f & action, float m1, float m2, float restitution)
 {
 	//作用方向ベクトル
-	Vector3f n = action;
+	Vector3f n(action);
 	n.normalize();
 	//n.debugWrite("n");
 
-	Vector3f temp1 = v1;
+	Vector3f temp1(v1);
 	temp1.normalize();
-	Vector3f temp2 = v2;
+	Vector3f temp2(v2);
 	temp2.normalize();
 
 	//temp1.debugWrite("t1");
@@ -161,7 +183,7 @@ Vector3f MyMath::calcTangent(const Vertex & v0,const Vertex & v1,const  Vertex &
 	Vector2f deltaUV2(v2.uv[0] - v0.uv[0], v2.uv[1] - v0.uv[1]);
 
 	float f = 1.0f / (deltaUV1.x*deltaUV2.y - deltaUV2.x*deltaUV1.y);
-	Vector3f tangent;
+	Vector3f tangent(0, 0, 0);
 	tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
 	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
 	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
@@ -179,7 +201,7 @@ Vector3d MyMath::calcTangent(const std::array<double,11> v0, const std::array<do
 	Vector2d deltaUV2(v2[6] - v0[6], v2[7] - v0[7]);
 
 	double d = 1.0 / (deltaUV1.x*deltaUV2.y - deltaUV2.x*deltaUV1.y);
-	Vector3d tangent;
+	Vector3d tangent(0, 0, 0);
 	tangent.x = d * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
 	tangent.y = d * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
 	tangent.z = d * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
@@ -194,7 +216,7 @@ Vector3f MyMath::calcNormal(const Vertex & v0, const Vertex & v1, const Vertex &
 	Vector3f v01(Vector3f(v1.position) - Vector3f(v0.position));
 	Vector3f v02(Vector3f(v2.position) - Vector3f(v0.position));
 
-	return v02.cross(v01);
+	return v01.cross(v02);
 }
 
 int MyMath::sign(float f)

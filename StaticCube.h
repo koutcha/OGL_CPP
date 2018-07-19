@@ -1,9 +1,9 @@
 #pragma once
 #include "StaticObject.h"
-#include "ColliderCube.h"
 #include <memory>
 #include "Vector3.h"
 class BallObject;
+class ColliderCube;
 class StaticCube :
 	public StaticObject
 {

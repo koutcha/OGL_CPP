@@ -1,9 +1,12 @@
+#define _USE_MATH_DEFINES
+
 #include "SolidShapeIndex.h"
 #include "GL\glew.h"
 #include "MathAndPhysic.h"
+
 #include <vector>
 #include <array>
-
+#include <cmath>  
 
 
 
@@ -25,9 +28,13 @@ std::shared_ptr<Shape> SolidShapeIndex::createSphereShape(int slices, int stacks
 {
 
 	//floatで計算すると誤差で見た目がおかしくなるのですべてdoubleで計算して計算結果をfloatに変換する
-	//大変だった
 
-	constexpr double pi = 3.14159265359;
+
+	//またおかしくなったので修正必須
+
+	//piの値がおかしかったみたい、いつ書き換えたのか
+	//math define に書き換える
+	constexpr double pi = M_PI;
 	std::vector<Object::Vertex> solidSphereVertex((slices + 1)*(stacks + 1));
 	std::vector<std::array<double,11> > doubleContener((slices + 1)*(stacks + 1));
 	for (int j = 0; j <= stacks; ++j)
@@ -87,9 +94,20 @@ std::shared_ptr<Shape> SolidShapeIndex::createSphereShape(int slices, int stacks
 		
 				tangent = result;
 				tangent.normalize();
-				doubleContener[index][8] = tangent.x;
-				doubleContener[index][9] = tangent.y;
-				doubleContener[index][10] = tangent.z;
+				for (int i = 0; i < 3; ++i)
+				{
+					if (doubleContener[index][8 + i] == 0)
+					{
+						doubleContener[index][8 + i] = tangent.getByIndex(i);
+					}
+					else
+					{
+						doubleContener[index][8 + i] += tangent.getByIndex(i);
+						doubleContener[index][8 + i] /= 2.0;
+					}
+				
+				}
+
 			}
 		}
 	}
@@ -145,10 +163,10 @@ std::shared_ptr<Shape> SolidShapeIndex::createBoxShape()
 		{ 1.0f, 1.0f, -1.0f,   0.1f, 0.1f, 0.8f  ,1.0f,0.0f },
 		{ 1.0f, 1.0f, 1.0f,   0.1f, 0.1f, 0.8f ,  1.0f,1.0f },
 		// 上
-		{ -1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f , 0.0f,1.0f },
-		{ -1.0f, 1.0f, 1.0f,   0.0f, 1.0f, 0.0f ,  0.0f,0.0f },
-		{ 1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f , 1.0f,0.0f },
-		{ 1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f ,  1.0f,1.0f },
+		{ -1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f , 0.0f,0.0f },
+		{ -1.0f, 1.0f, 1.0f,   0.0f, 1.0f, 0.0f ,  0.0f,1.0f },
+		{ 1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f , 1.0f,1.0f },
+		{ 1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f ,  1.0f,0.0f },
 		// 前
 		{ -1.0f, -1.0f, 1.0f,  0.0f, 0.8f, 0.1f , 1.0f,0.0f },
 		{ 1.0f, -1.0f, 1.0f,   0.0f, 0.8f, 0.1f , 0.0f,0.0f },
@@ -174,11 +192,9 @@ std::shared_ptr<Shape> SolidShapeIndex::createBoxShape()
 		int index2 = sci[i * 3 + 2];
 
 		Vector3f n = MyMath::calcNormal(scv[index0], scv[index1], scv[index2]);
-		n.normalize();
-		//n *= -1.0;
-		n.debugWrite("n");
+
 		Vector3f tan = MyMath::calcTangent(scv[index0], scv[index1], scv[index2]);
-		tan.normalize();
+		
 		scv[index0].normal =n.getArrayData();
 		scv[index1].normal = n.getArrayData();
 		scv[index2].normal = n.getArrayData();
@@ -191,6 +207,79 @@ std::shared_ptr<Shape> SolidShapeIndex::createBoxShape()
 	return 	std::shared_ptr<Shape>(new SolidShapeIndex(3,
 		static_cast<GLsizei>(24), solidCubeVertex, static_cast<GLsizei>(36), solidCubeIndex));
 
+}
+std::shared_ptr<Shape> SolidShapeIndex::createBoxShape(float uvScaleX, float uvScaleY, float uvScaleZ)
+{
+	// 六面体の頂点の位置
+	// 面ごとに色を変えた六面体の頂点属性
+
+	Object::Vertex solidCubeVertex[] =
+	{
+		//p n uv tan
+		// 左
+	{ -1.0f, -1.0f, -1.0f,  -1.0f, 0.0f, 0.0f , 0.0f,uvScaleZ},
+	{ -1.0f, -1.0f, 1.0f,   -1.0f, 0.0f, 0.0f , 0.0f,0.0f },
+	{ -1.0f, 1.0f, 1.0f,    -1.0f,  0.0f, 0.0f , uvScaleY,0.0f },
+	{ -1.0f, 1.0f, -1.0f,   -1.0f, 0.0f, 0.0f ,  uvScaleY,uvScaleZ },
+	// 裏
+	{ 1.0f, -1.0f, -1.0f,  0.0, 1.1f, 0.8f , 0.0f,uvScaleX},
+	{ -1.0f, -1.0f, -1.0f, 0.8f, 0.1f, 0.8f , 0.0f,0.0f },
+	{ -1.0f, 1.0f, -1.0f,  0.8f, 0.1f, 0.8f ,uvScaleY,0.0f },
+	{ 1.0f, 1.0f, -1.0f,   0.8f, 0.1f, 0.8f ,uvScaleY,uvScaleZ },
+	// 下
+	{ -1.0f, -1.0f, -1.0f,  0.1f, 0.8f, 0.8f , 0.0f,uvScaleZ},
+	{ 1.0f, -1.0f, -1.0f,   0.1f, 0.8f, 0.8f ,0.0f,0.0f },
+	{ 1.0f, -1.0f, 1.0f,   0.1f, 0.8f, 0.8f ,uvScaleY,0.0f },
+	{ -1.0f, -1.0f, 1.0f,   0.1f, 0.8f, 0.8f ,uvScaleY,uvScaleZ },
+	// 右
+	{ 1.0f, -1.0f, 1.0f,   0.1f, 0.1f, 0.8f , 0.0f,1.0f*uvScaleZ },
+	{ 1.0f, -1.0f, -1.0f,  0.1f, 0.1f, 0.8f , 0.0f,0.0f },
+	{ 1.0f, 1.0f, -1.0f,   0.1f, 0.1f, 0.8f  ,uvScaleY,0.0f },
+	{ 1.0f, 1.0f, 1.0f,   0.1f, 0.1f, 0.8f ,  uvScaleY,1.0f*uvScaleZ },
+	// 上
+	{ -1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f , 0.0f,0.0f },
+	{ -1.0f, 1.0f, 1.0f,   0.0f, 1.0f, 0.0f ,  0.0f,uvScaleZ },
+	{ 1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f , uvScaleX,uvScaleZ },
+	{ 1.0f, 1.0f, -1.0f,   0.0f, 1.0f, 0.0f ,  uvScaleX,0.0f },
+	// 前
+	{ -1.0f, -1.0f, 1.0f,  0.0f, 0.8f, 0.1f , uvScaleX,0.0f },
+	{ 1.0f, -1.0f, 1.0f,   0.0f, 0.8f, 0.1f , 0.0f,0.0f },
+	{ 1.0f, 1.0f, 1.0f,    0.0f, 0.8f, 0.1f  ,0.0f,uvScaleY },
+	{ -1.0f, 1.0f, 1.0f,   0.0f, 0.8f, 0.1f,  uvScaleX,uvScaleY }
+	};
+	// 六面体の面を塗りつぶす三角形の頂点のインデックス
+	constexpr GLuint solidCubeIndex[] =
+	{
+		0, 1, 2, 0, 2, 3, // 左
+		4, 5, 6, 4, 6, 7, // 裏
+		8, 9, 10, 8, 10, 11, // 下
+		12, 13, 14, 12, 14, 15, // 右
+		16, 17, 18, 16, 18, 19, // 上
+		20, 21, 22, 20, 22, 23 // 前
+	};
+	Object::Vertex* scv = solidCubeVertex;
+	const GLuint* sci = solidCubeIndex;
+	for (int i = 0; i < 12; ++i)
+	{
+		int index0 = sci[i * 3];
+		int index1 = sci[i * 3 + 1];
+		int index2 = sci[i * 3 + 2];
+
+		Vector3f n = MyMath::calcNormal(scv[index0], scv[index1], scv[index2]);
+
+		Vector3f tan = MyMath::calcTangent(scv[index0], scv[index1], scv[index2]);
+
+		scv[index0].normal = n.getArrayData();
+		scv[index1].normal = n.getArrayData();
+		scv[index2].normal = n.getArrayData();
+
+		scv[index0].tangent = tan.getArrayData();
+		scv[index1].tangent = tan.getArrayData();
+		scv[index2].tangent = tan.getArrayData();
+	}
+
+	return 	std::shared_ptr<Shape>(new SolidShapeIndex(3,
+		static_cast<GLsizei>(24), solidCubeVertex, static_cast<GLsizei>(36), solidCubeIndex));
 }
 std::shared_ptr<Shape> SolidShapeIndex::createPlaneShape(float width, float depth)
 {
@@ -214,8 +303,6 @@ std::shared_ptr<Shape> SolidShapeIndex::createPlaneShape(float width, float dept
 		int index2 = sci[i * 3 + 2];
 
 		Vector3f n = MyMath::calcNormal(scv[index0], scv[index1], scv[index2]);
-		n *= -1.0;
-		n.debugWrite("n");
 		Vector3f tan = MyMath::calcTangent(scv[index0], scv[index1], scv[index2]);
 		scv[index0].normal = n.getArrayData();
 		scv[index1].normal = n.getArrayData();

@@ -44,6 +44,7 @@ private:
 template<typename T>
 Vector3<T>::Vector3()
 {
+
 }
 template<typename T>
 Vector3<T>::Vector3(const T& x,const T& y,const T& z) :
@@ -166,8 +167,12 @@ template<typename T>
 void Vector3<T>::normalize()
 {
 	float length = this->length();
-	if (length > 0.00000001) {
+	if (length > 0) {
 		*this /= length;
+	}
+	else
+	{
+		//std::cerr << "cant normalize zero Vector" << std::endl;
 	}
 }
 

@@ -1,17 +1,19 @@
 #define _USE_MATH_DEFINES
 #include <iostream>
 #include <array>
+#include<thread>
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 #include "GLFW\glfw3native.h"
 #include "Window.h"
 #include "JoyPad.h"
-
-#include "Particle.h"
+#include "GameMain.h"
 #include "Audio.h"
+#include "Listener.h"
 #include "SoundPlayer.h"
 #include "ballSim.h"
 #include "PerspectiveCamera.h"
+#include "ParticleTest.h"
 #include "Skybox.h"
 #include "InitShader.h"
 #include "MathAndPhysic.h"
@@ -55,93 +57,48 @@ int main()
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	
-
+	//activate Sound System
+	Sound::Audio audio;
+	//Sound::Listener;
+	//Sound::SoundPlayer sound("dtyd.wav");
 	joypad->intialize();
 
-	Sound::Audio audio;
-	Sound::SoundPlayer test("dtydcvsdfafafafafa.wav");
 
-	GLuint cMap(loadProgram("cubemapping.vert", "cubemapping.frag"));
+	//fps setting 
+	double FPS = 60.0;
+	double currentTime = 0.0, lastTime = 0.0, nextTime = 0.0;
+	double interval = 1.0 / FPS;
+	double dSleep = 0.0;
+	int sleep = 0;
+	lastTime = 0;
+	nextTime = interval;
+	float delta = 0;
+	GameMain gmain(window, joypad);
 
-	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-	//Particle particle;
-	//double lastTime = 0;
-	//ballSim sim(window,pad);
-	PerspectiveCamera mainCam(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0, 1, 0), Vector3f(0, 0, 0)
-		, 1.0f, 100.0f, M_PI / 3.0f,
-		static_cast<float>(window->getSize()[0]) / static_cast<float>(window->getSize()[1]));
-
-	std::shared_ptr<Shape> shape(SolidShapeIndex::createBoxShape());
-
-	MyMath::calcReflex(Vector3f(0, -1, 0), Vector3f(0, 1, 0), 1.0, 1.0).debugWrite("reflex");
-	std::array<std::string,6> faces
-	{
-		"front.tga",
-		"back.tga",
-		"up.tga",
-		"bottom.tga",
-		"right.tga",
-		"left.tga"
-	};
-	Skybox box(faces);
-	box.setHalfScale(30);
-	float count = 0;
-	double lastTime = glfwGetTime();
-	cout << "init render" << endl;
-	Controller ct(window,joypad,0);
-
+	//ballSim sim(*window,*joypad);
+	
 	while (window->shouldClose() == GL_FALSE)
 	{
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		mainCam.setGaze(Vector3f(0,0,
-			0));
-		mainCam.setPosition(Vector3f(10*sin(count), 0.0,10*cos(count)));
-		ct.updateFrame();
-
-		if (window->keyTriggered(GLFW_KEY_ENTER))
+	
+		currentTime = glfwGetTime();
+		if (currentTime >= nextTime)
 		{
-			test.play();
-		}
-
-		double currentTime = glfwGetTime();
-		double delta = currentTime - lastTime;
-		lastTime = currentTime;
-		//particle.updateAndDraw(delta, mainCam);
-
-			
-		//sim.update();
-		////swap color buffers and take out events
-		box.draw(mainCam);
-		glUseProgram(cMap);
-		box.bindThisCubeMap(0);
-		glUniform1i(glGetUniformLocation(cMap, "cubeTexture"), 0);
-		glUniform1i(glGetUniformLocation(cMap, "isReflection"),true);
-		glUniform3fv(glGetUniformLocation(cMap, "viewPos"), 1, mainCam.getPosition().getArrayData().data());
-		mainCam.setCamera(glGetUniformLocation(cMap,"view"), glGetUniformLocation(cMap,"projection"));
-		for (int i = 0; i < 3; ++i)
-		{
-			for (int j = 0; j < 3; ++j)
-			{
-				glUniformMatrix4fv(glGetUniformLocation(cMap, "model"), 1, GL_FALSE, (Matrix::translate(-3.0 + i * 3,-3.0 + 3*j, 0)*
-					Matrix::rotateY(20)).data());
-				shape->draw();
-			}
+			delta += interval;
+			lastTime = currentTime;
+			nextTime = currentTime + interval;
+			gmain.updateForMainLoop();
+			//sim.update();
+			window->swapBuffers();
+			window->pollEvents();
 
 		}
-		if (ct.getOperateIsOn(Controller::UP))
+		else 	if ((dSleep = nextTime - currentTime) >0)
 		{
-			count += 0.01;
-		}
-		else if (ct.getOperateIsOn(Controller::DOWN))
-		{
-			count -= 0.01;
-		}
 		
-		window->swapBuffers();
-		window->pollEvents();
+			sleep = dSleep * 1000;
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+		}
+
 		
 	}
 

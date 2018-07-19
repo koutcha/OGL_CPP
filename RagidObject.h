@@ -9,7 +9,7 @@ using namespace std;
 class RagidObject
 {
 public:
-	RagidObject(shared_ptr<Shape> shape);
+	RagidObject(const shared_ptr<const Shape>& shape);
 	virtual ~RagidObject();
 
 	virtual void draw(GLuint modelLoc) const;
@@ -17,8 +17,8 @@ public:
 	void setScale(const Vector3f& scale);
 	virtual void setPosition(const Vector3f& position);
 	virtual void setVelocity(const Vector3f& velocity);
-	virtual void setRotation(float angle, Vector3f& rotationAxis);
-	void addRotation(float angle, Vector3f & rotationAxis);
+	virtual void setRotation(float angle,const  Vector3f& rotationAxis);
+	void addRotation(float angle,const Vector3f & rotationAxis);
 	virtual void setAcceleration(const Vector3f& acceleration);
 	virtual void setWeight(float f);
 	virtual void setFriction(float friction);
@@ -31,6 +31,6 @@ public:
 	float getWeight()const;
 private:
 	Vector3f shapeScale;
-	shared_ptr<Shape> shape;
+	shared_ptr<const Shape> shape;
 	unique_ptr<Ragid> body;
 };

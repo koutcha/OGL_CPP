@@ -13,7 +13,7 @@ public:
 
 	void setConjugate(const Quaternion & q);
 	void set(const Vector3f& xyz, float w);
-	//angle  is radian angle
+	//please set angle by using radian
 	void setRotation(const Vector3f& axis, float angle);
 	const Quaternion& operator *=(const Quaternion& q);
 	const Quaternion operator *(const Quaternion& q);

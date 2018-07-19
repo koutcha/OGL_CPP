@@ -5,18 +5,19 @@
 using namespace std;
 namespace Sound {
 	Audio::Audio():
-		device(nullptr),
-		context(nullptr)
+		device(alcOpenDevice(nullptr), [](ALCdevice* device) {  cout << "device del" << endl; return alcCloseDevice(device); }),
+		context(alcCreateContext(device.get(), nullptr), [](ALCcontext* context) {cout << "context del" << endl; return alcDestroyContext(context);  })
 	{
-		device.reset(alcOpenDevice(nullptr), [](ALCdevice* device) {alcCloseDevice(device);  cout << "device del" << endl; });
-		context.reset(alcCreateContext(device.get(), nullptr), [](ALCcontext* context) {alcDestroyContext(context); cout << "context del" << endl;  });
+		//カスタムデリータはmake uniqueできない
 		alcMakeContextCurrent(context.get());
 	}
 
 
 	Audio::~Audio()
 	{
+		
 		alcMakeContextCurrent(nullptr);
+		cout << "delAudio" << endl;
 	}
 }
 

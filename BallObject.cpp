@@ -4,7 +4,7 @@
 #include "Matrix.h"
 #include <iostream>
 #include <random>
-BallObject::BallObject(shared_ptr<Shape> shape,float r):
+BallObject::BallObject(const shared_ptr<const Shape>& shape,float r):
 	RagidObject(shape),
 	collider(new ColliderSphere()),
 	time(0)
@@ -37,12 +37,16 @@ const ColliderSphere & BallObject::getCollider() const
 void BallObject::update(float dt)
 {
 	time += dt;
-	RagidObject::update(dt);
+	//回転の更新
 	Vector3f v = RagidObject::getVelocity();
 	Matrix m(Matrix::rotateY(90));
 	v.y = 0.f;
+	float len = v.length()*dt;
 	v = m * v;
-	RagidObject::addRotation(v.length()/getRadius(), v);
+	
+	RagidObject::addRotation(len/getRadius(), v);
+	//玉の位置の更新
+	RagidObject::update(dt);
 	collider->setPosition(RagidObject::getPosition());
 }
 

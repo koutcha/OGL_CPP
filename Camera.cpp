@@ -26,6 +26,11 @@ Camera::~Camera()
 }
 
 
+void Camera::setViewPos(GLuint viewPosLoc) const
+{
+	glUniform3fv(viewPosLoc, 1,position.getArrayData().data());
+}
+
 void Camera::setPosition(const Vector3f &p)
 {
 	position = p;

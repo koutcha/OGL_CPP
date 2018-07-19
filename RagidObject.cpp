@@ -5,7 +5,7 @@
 
 
 
-RagidObject::RagidObject(shared_ptr<Shape> shape):
+RagidObject::RagidObject(const shared_ptr<const Shape>& shape):
 	shapeScale(1,1,1),
 	shape(shape),
 	body(std::make_unique<Ragid>())
@@ -46,11 +46,11 @@ void RagidObject::setVelocity(const Vector3f & velocity)
 	body->setVelocity(velocity);
 }
 
-void RagidObject::setRotation(float angle, Vector3f & rotationAxis)
+void RagidObject::setRotation(float angle,const Vector3f & rotationAxis)
 {
 	body->setRotation(angle, rotationAxis);
 }
-void RagidObject::addRotation(float angle, Vector3f & rotationAxis)
+void RagidObject::addRotation(float angle,const Vector3f & rotationAxis)
 {
 	body->addRotation(angle, rotationAxis);
 }
